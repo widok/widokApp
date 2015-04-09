@@ -5,13 +5,18 @@ import org.widok.html._
 import org.widok.bindings.Bootstrap._
 import org.widok.bindings.HTML.Label
 
+case class Issue(name: String, id: Long)
+
 object Main extends PageApplication {
 
   val jsonResult = Var("")
   val hasResult = jsonResult.map { x => x.nonEmpty }
   val name = Var("")
   val hasName = name.map(_.nonEmpty)
-  val prodName = "Factex"
+  val prodName = "Skan"
+
+  val issues = Buffer[Ref[Issue]]()
+  val hasIssues = issues.nonEmpty
 
   val navbar = NavigationBar(Container(
     NavigationBar.Header(NavigationBar.Toggle(), NavigationBar.Brand(prodName)),
@@ -26,16 +31,23 @@ object Main extends PageApplication {
     Button("Clear").onClick(x => {
       jsonResult := ""
       name := ""
+      issues.+=(Ref(FactExtractor.createIssue(name.get)))
     }).css("btn-primary")).css("col-md-3")
 
-  val resultsPane = div(h3("Extracted Data in JSON"), jsonResult).css("col-md-9").show(hasResult)
+  lazy val issuesList = div(ul(issues.map {
+    x => li(x.get.id)
+  })).show(hasIssues)
+
+  val resultsPane = div(h3("Extracted Data in JSON"), jsonResult, ul(li("list"))).css("col-md-9").show(hasResult)
   val container = Container(qryPane, resultsPane) // , resultsPane
 
   def view() = {
-    Inline(navbar, container)
+    Inline(navbar, container, issuesList)
   }
 
-  def ready() {}
+  def ready() {
+    issues.+=(Ref(FactExtractor.createIssue("")))
+  }
 }
 
 object FactExtractor {
@@ -45,5 +57,7 @@ object FactExtractor {
   "date" : "${System.currentTimeMillis()}"},
   "fact-data" : "loren Ipsum"  
   }"""
+
+  def createIssue(url: String) = Issue(url, System.currentTimeMillis())
 }
 
