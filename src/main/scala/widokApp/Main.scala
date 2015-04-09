@@ -22,17 +22,17 @@ object Main extends PageApplication {
     NavigationBar.Header(NavigationBar.Toggle(), NavigationBar.Brand(prodName)),
     NavigationBar.Collapse()))
 
-  val qryPane = div(
+  val qryPane = Grid.Column(
     Label("Enter URL").forId("url"),
     Input.Text().placeholder("URL").id("url").bind(name).size(Size.Large),
     br(),
-    Button("Create").onClick(x => jsonResult := FactExtractor.extactFact(name.get)).css("btn-primary"),
-    span(" "),
+    Button("Create").onClick(x => jsonResult := FactExtractor.extactFact(name.get)).style(Style.Primary),
+    " ",
     Button("Clear").onClick(x => {
       jsonResult := ""
       name := ""
       issues.+=(Ref(FactExtractor.createIssue(name.get)))
-    }).css("btn-primary")).css("col-md-3")
+    }).style(Style.Primary)).column(Size.Medium, 3)
 
   lazy val issuesList = div(ul(issues.map {
     x => li(x.get.id)
@@ -46,16 +46,16 @@ object Main extends PageApplication {
   }
 
   def ready() {
-    issues.+=(Ref(FactExtractor.createIssue("")))
+    issues += Ref(FactExtractor.createIssue(""))
   }
 }
 
 object FactExtractor {
 
   def extactFact(url: String) = s"""{
-  "source" : "${url}", 
+  "source" : "$url",
   "date" : "${System.currentTimeMillis()}"},
-  "fact-data" : "loren Ipsum"  
+  "fact-data" : "Lorem Ipsum"
   }"""
 
   def createIssue(url: String) = Issue(url, System.currentTimeMillis())
